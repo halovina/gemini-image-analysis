@@ -1,1 +1,2 @@
 -- pip install mesop ---
+-- pip install google-generativeai --
