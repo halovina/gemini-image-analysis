@@ -13,7 +13,7 @@ generation_config = {
 def configure_gemini():
     genai.configure(api_key=os.getenv("APIKEY"))
     
-def send_prompt_flash(prompt: str, history: list[ChatMessage]) -> Iterable[str]:
+def send_prompt_flash(fileimage, prompt: str, history: list[ChatMessage]) -> Iterable[str]:
     configure_gemini()
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash-latest",
@@ -24,5 +24,5 @@ def send_prompt_flash(prompt: str, history: list[ChatMessage]) -> Iterable[str]:
             {"role": message.role, "parts": [message.content]} for message in history
         ]
     )
-    for chunk in chat_session.send_message(prompt, stream=True):
+    for chunk in chat_session.send_message([prompt, fileimage], stream=True):
         yield chunk.text

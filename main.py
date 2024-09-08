@@ -2,6 +2,8 @@ import mesop as me
 import base64
 from data_model import State, ChatMessage, Conversation
 import gemini
+from PIL import Image
+
 
 ROOT_BOX_STYLE = me.Style(
     background="#e7f2ff",
@@ -43,23 +45,6 @@ def app():
     state = me.state(State)
     with me.box(style=ROOT_BOX_STYLE):
         header()
-        
-        models = len(state.conversations)
-        models_px = models * 680
-        with me.box(
-            style=me.Style(
-                width=f"min({models_px}px, calc(100% - 32px))",
-                display="grid",
-                gap=16,
-                grid_template_columns=f"repeat({models}, 1fr)",
-                flex_grow=1,
-                overflow_y="hidden",
-                margin=me.Margin.symmetric(horizontal="auto"),
-                padding=me.Padding.symmetric(horizontal=16),
-            )
-        ):
-           model_conversation()
-            
             
         with me.box(
             style=me.Style(
@@ -74,6 +59,23 @@ def app():
                 )
             ):
                 promp_input()
+        
+        models = len(state.conversations)
+        models_px = models * 680
+        with me.box(
+            style=me.Style(
+                 background="#e7f2ff",
+                width=f"min({models_px}px, calc(100% - 32px))",
+                height=500,
+                display="grid",
+                gap=16,
+                grid_template_columns=f"repeat({models}, 1fr)",
+                flex_grow=1,
+                margin=me.Margin.symmetric(horizontal="auto"),
+                padding=me.Padding.symmetric(horizontal=16),
+            )
+        ):
+           model_conversation()
             
                 
                         
@@ -175,6 +177,10 @@ def send_prompt(e: me.ClickEvent):
     input = state.input
     state.input = ""
     
+    fileimage =""
+    if state.file.size:
+        fileimage = Image.open(state.file)
+    
     for conversation in state.conversations:
         messages = conversation.messages
         history = messages[:]
@@ -183,7 +189,7 @@ def send_prompt(e: me.ClickEvent):
         yield
         
         me.scroll_into_view(key="end_of_messages")
-        llm_message = gemini.send_prompt_flash(input, history)
+        llm_message = gemini.send_prompt_flash(fileimage, input, history)
         
         for chunck in llm_message:
             messages[-1].content += chunck
